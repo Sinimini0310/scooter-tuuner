@@ -101,4 +101,3 @@ Nach erfolgreichem Pairing werden alle Pakete mit **AES-128 (CTR-Modus, ECB-basi
 
 - Crypto-Implementierung basiert auf [scooterhacking/NinebotCrypto](https://github.com/scooterhacking/NinebotCrypto)
 - Lizenz: **AGPL-3.0**
-```
