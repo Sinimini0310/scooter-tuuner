@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e13" />
+  <meta name="description" content="Ninebot F2 Pro D Web Bluetooth Tuning App" />
+  <title>F2 Pro Tuner</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── Loading Overlay ──────────────────────────────── -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p id="loading-text" class="loading-text">Bitte warten…</p>
+  </div>
+
+  <!-- ── Toast Container ──────────────────────────────── -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ── App Shell ────────────────────────────────────── -->
+  <div class="app-shell">
+
+    <!-- ── App Header ─────────────────────────────────── -->
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">F2 PRO <span class="logo-accent">TUNER</span></span>
+      </div>
+      <div id="connection-badge" class="connection-badge disconnected">
+        <span class="badge-dot"></span>
+        <span class="badge-label">Getrennt</span>
+      </div>
+    </header>
+
+    <!-- ── Views ──────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- ────────────────────────────────────────────────
+           VIEW: START
+           ──────────────────────────────────────────────── -->
+      <section id="view-start" class="view active">
+        <div class="start-hero">
+          <div class="hero-gfx">
+            <div class="hero-ring ring-1"></div>
+            <div class="hero-ring ring-2"></div>
+            <div class="hero-ring ring-3"></div>
+            <div class="hero-scooter">🛴</div>
+          </div>
+          <h1 class="hero-title">Ninebot<br /><span class="accent">F2 Pro D</span><br />Tuner</h1>
+          <p class="hero-sub">Web Bluetooth · Kein Download · Chrome only</p>
+        </div>
+
+        <div class="warning-banner">
+          <span class="warn-icon">⚠</span>
+          <p>Nur auf Privatgelände erlaubt.<br />
+             Tuning erlischt die ABE und den Versicherungsschutz.<br />
+             Straßennutzung ist nach StVZO §22 <strong>illegal</strong>.</p>
+        </div>
+
+        <div class="start-requirements">
+          <div class="req-item">
+            <span class="req-icon">🌐</span>
+            <span>Chrome (Android oder Desktop)</span>
+          </div>
+          <div class="req-item">
+            <span class="req-icon">📡</span>
+            <span>Bluetooth aktiviert</span>
+          </div>
+          <div class="req-item">
+            <span class="req-icon">🔋</span>
+            <span>Scooter eingeschaltet &amp; in Reichweite</span>
+          </div>
+        </div>
+
+        <button id="btn-connect" class="btn btn-primary btn-xl pulse-glow">
+          <span class="btn-icon">⚡</span>
+          Mit Scooter verbinden
+        </button>
+
+        <button id="btn-reconnect" class="btn btn-ghost" style="display:none">
+          Erneut verbinden
+        </button>
+      </section>
+
+      <!-- ────────────────────────────────────────────────
+           VIEW: STATUS
+           ──────────────────────────────────────────────── -->
+      <section id="view-status" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Status</h2>
+          <span id="device-name" class="device-name-badge">–</span>
+        </div>
+
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-label">Akku</div>
+            <div id="battery-value" class="status-value accent">–%</div>
+            <div class="battery-track">
+              <div id="battery-bar" class="battery-fill high" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Geschwindigkeit</div>
+            <div id="speed-value" class="status-value">– km/h</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Fahrmodus</div>
+            <div id="mode-value" class="status-value">–</div>
+          </div>
+          <div class="status-card status-card-note">
+            <p class="status-note">Status wird alle 3s aktualisiert.<br>
+            Für Tuning-Optionen zuerst <strong>Pairing</strong> starten.</p>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn btn-primary" data-nav="view-tuning">
+            <span class="btn-icon">⚙</span> Tuning
+          </button>
+          <button id="btn-disconnect" class="btn btn-danger">
+            <span class="btn-icon">✕</span> Trennen
+          </button>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────
+           VIEW: PAIRING
+           ──────────────────────────────────────────────── -->
+      <section id="view-pairing" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Pairing</h2>
+        </div>
+
+        <div class="pairing-visual">
+          <div class="pairing-pulse"></div>
+          <div class="pairing-icon">🔗</div>
+        </div>
+
+        <div class="pairing-step-display">
+          <div id="pairing-step" class="pairing-step-label">Schritt 1/3</div>
+          <div id="pairing-status" class="pairing-status-text">Wird gestartet…</div>
+        </div>
+
+        <div class="pairing-steps-list">
+          <div class="pairing-step-item" data-step="1">
+            <div class="step-num">1</div>
+            <div class="step-desc">Handshake mit Scooter</div>
+          </div>
+          <div class="pairing-step-item" data-step="2">
+            <div class="step-num">2</div>
+            <div class="step-desc">
+              <strong>Power-Button am Scooter drücken!</strong><br />
+              <small>Warte auf Bestätigung (max. 30s)</small>
+            </div>
+          </div>
+          <div class="pairing-step-item" data-step="3">
+            <div class="step-num">3</div>
+            <div class="step-desc">Seriennummer bestätigen</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────
+           VIEW: TUNING
+           ──────────────────────────────────────────────── -->
+      <section id="view-tuning" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Tuning</h2>
+          <button id="btn-pair" class="btn btn-sm btn-outline">Pairen</button>
+        </div>
+
+        <!-- Method A: HEX Direct -->
+        <div class="tuning-card">
+          <div class="card-header">
+            <span class="card-tag tag-a">Methode A</span>
+            <h3 class="card-title">Speed-Modus (Schnell)</h3>
+          </div>
+          <p class="card-desc">Kein Pairing nötig. Aktiviert 32 km/h auf F2 Pro D.
+          Danach Scooter neu starten &amp; S-Mode in der Segway-App auf Max stellen.</p>
+          <div class="method-a-btns">
+            <button id="btn-speed-on" class="btn btn-primary">
+              <span class="btn-icon">🚀</span> Speed AN (32 km/h)
+            </button>
+            <button id="btn-speed-off" class="btn btn-secondary">
+              <span class="btn-icon">🐢</span> Normal (20 km/h)
+            </button>
+          </div>
+        </div>
+
+        <!-- Method B: Full Protocol -->
+        <div class="tuning-card">
+          <div class="card-header">
+            <span class="card-tag tag-b">Methode B</span>
+            <h3 class="card-title">Vollprotokoll</h3>
+          </div>
+          <p class="card-desc">Pairing erforderlich. Exakte km/h, Zero Start, Tempomat und Fahrmodus.</p>
+
+          <!-- Speed Limit Slider -->
+          <div class="control-group">
+            <label class="ctrl-label">
+              Geschwindigkeitslimit
+              <span id="slider-speed-value" class="ctrl-value">20 km/h</span>
+            </label>
+            <div class="slider-wrap">
+              <span class="slider-min">10</span>
+              <input id="slider-speed" type="range" min="10" max="35" step="1" value="20" class="slider" />
+              <span class="slider-max">35</span>
+            </div>
+          </div>
+
+          <!-- Drive Mode -->
+          <div class="control-group">
+            <label class="ctrl-label" for="select-drive-mode">Fahrmodus</label>
+            <div class="select-wrap">
+              <select id="select-drive-mode" class="select">
+                <option value="0">🍃 Eco</option>
+                <option value="1" selected>⚡ Drive</option>
+                <option value="2">🔥 Sport</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="control-group toggle-group">
+            <div class="toggle-row">
+              <label class="ctrl-label" for="toggle-zero-start">Zero Start</label>
+              <p class="toggle-desc">Kein Ankicken nötig</p>
+              <label class="toggle">
+                <input id="toggle-zero-start" type="checkbox" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group toggle-group">
+            <div class="toggle-row">
+              <label class="ctrl-label" for="toggle-cruise">Tempomat</label>
+              <p class="toggle-desc">Automatische Geschwindigkeitshaltung</p>
+              <label class="toggle">
+                <input id="toggle-cruise" type="checkbox" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Apply -->
+          <button id="btn-apply-all" class="btn btn-primary btn-block">
+            <span class="btn-icon">✓</span> Einstellungen speichern
+          </button>
+        </div>
+
+        <!-- Reset -->
+        <div class="tuning-card reset-card">
+          <h3 class="card-title">Zurücksetzen</h3>
+          <p class="card-desc">Alle Register auf Werkseinstellungen (20 km/h, Drive-Modus, kein Zero Start).</p>
+          <button id="btn-reset-all" class="btn btn-danger btn-block">
+            <span class="btn-icon">↩</span> Alles zurücksetzen
+          </button>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────
+           VIEW: INFO
+           ──────────────────────────────────────────────── -->
+      <section id="view-info" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Info</h2>
+        </div>
+
+        <div class="info-card warning-card">
+          <h3>⚠ Rechtlicher Hinweis</h3>
+          <p>Das Tunen des Ninebot F2 Pro D erlischt die allgemeine Betriebserlaubnis (ABE) und den
+          Versicherungsschutz. Der Betrieb auf öffentlichen Straßen ist nach <strong>StVZO §22 illegal</strong>
+          und kann zu Bußgeldern, Punkten in Flensburg oder strafrechtlicher Verfolgung führen.</p>
+          <p><strong>Diese App darf ausschließlich auf privatem Gelände verwendet werden.</strong></p>
+        </div>
+
+        <div class="info-card">
+          <h3>📱 Kompatibilität</h3>
+          <ul>
+            <li>✅ Chrome auf Android</li>
+            <li>✅ Chrome / Edge auf Desktop (Windows, Mac, Linux)</li>
+            <li>❌ Firefox (kein Web Bluetooth)</li>
+            <li>❌ Safari / iOS (kein Web Bluetooth)</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3>📡 Anleitung</h3>
+          <ol>
+            <li>Scooter einschalten und Bluetooth aktivieren</li>
+            <li>App im Chrome-Browser öffnen (HTTPS!)</li>
+            <li>"Verbinden" klicken und Scooter im Picker auswählen</li>
+            <li>Für Methode B: "Pairen" klicken und Power-Button am Scooter drücken</li>
+            <li>Einstellungen vornehmen und speichern</li>
+          </ol>
+        </div>
+
+        <div class="info-card">
+          <h3>🔗 Quellen</h3>
+          <ul class="source-list">
+            <li><a href="https://github.com/scooterhacking/NinebotCrypto" target="_blank" rel="noopener">NinebotCrypto (GitHub)</a></li>
+            <li><a href="https://github.com/etransport/ninebot-docs/wiki/protocol" target="_blank" rel="noopener">Ninebot Protokoll Wiki</a></li>
+            <li><a href="https://utility.cfw.sh/" target="_blank" rel="noopener">ScooterHacking Utility</a></li>
+          </ul>
+        </div>
+
+        <div class="app-version">F2 Pro Tuner v1.0 · Nur Privatgelände</div>
+      </section>
+
+    </main><!-- /main-content -->
+
+    <!-- ── Bottom Navigation ─────────────────────────── -->
+    <nav class="bottom-nav">
+      <button class="nav-tab" data-nav="view-start">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">Start</span>
+      </button>
+      <button class="nav-tab" data-nav="view-status">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Status</span>
+      </button>
+      <button class="nav-tab" data-nav="view-tuning">
+        <span class="nav-icon">⚙</span>
+        <span class="nav-label">Tuning</span>
+      </button>
+      <button class="nav-tab" data-nav="view-info">
+        <span class="nav-icon">ℹ</span>
+        <span class="nav-label">Info</span>
+      </button>
+    </nav>
+
+  </div><!-- /app-shell -->
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
