@@ -47,7 +47,11 @@ export async function bleConnect() {
   bleDevice = await navigator.bluetooth.requestDevice({
     filters: [
       { namePrefix: 'YG' },
+      { namePrefix: 'Ninebot' },
+      { namePrefix: 'MIScooter' },
+      { namePrefix: 'NB' },
     ],
+    acceptAllDevices: true,
     optionalServices: [BLE_UUID.UART_SERVICE],
   });
 
