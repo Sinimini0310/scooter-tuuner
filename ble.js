@@ -44,16 +44,22 @@ export async function bleConnect() {
     throw new Error('Web Bluetooth nicht unterstützt. Bitte Chrome auf Android oder Desktop nutzen.');
   }
 
+  // Zum Debuggen: Alle Geräte anzeigen, um den echten Namen zu sehen
   bleDevice = await navigator.bluetooth.requestDevice({
-    filters: [
-      { namePrefix: 'YG' },
-      { namePrefix: 'Ninebot' },
-      { namePrefix: 'MIScooter' },
-      { namePrefix: 'NB' },
-    ],
     acceptAllDevices: true,
     optionalServices: [BLE_UUID.UART_SERVICE],
   });
+  // Produktiv: Nur passende Geräte anzeigen
+  // bleDevice = await navigator.bluetooth.requestDevice({
+    // filters: [
+      // { namePrefix: 'YG' },
+      // { namePrefix: 'Ninebot' },
+      // { namePrefix: 'MIScooter' },
+      // { namePrefix: 'NB' },
+    // ],
+    // optionalServices: [BLE_UUID.UART_SERVICE],
+  // });
+
 
   bleDevice.addEventListener('gattserverdisconnected', _handleDisconnect);
 
