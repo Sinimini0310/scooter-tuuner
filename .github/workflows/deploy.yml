@@ -12,14 +12,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH/rsync
+      - name: Create remote directory via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
-          script: mkdir -p /home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner
+          script: mkdir -p ~/domains/bilen.me/public_html/scooter-tuuner
 
       - name: Copy files via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -29,5 +29,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
           source: "index.html,style.css,app.js,ble.js,crypto.js,pairing.js,protocol.js,registers.js"
-          target: "/home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner/"
+          target: "/home/${{ secrets.FTP_USERNAME }}/domains/bilen.me/public_html/scooter-tuuner/"
           strip_components: 0
