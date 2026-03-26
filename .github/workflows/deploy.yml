@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create remote directory via SSH
+      - name: Deploy via SSH/rsync
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.FTP_SERVER }}
@@ -21,13 +21,13 @@ jobs:
           port: 65002
           script: mkdir -p /home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner
 
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Copy files via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
-          local_path: ./*
-          remote_path: /public_html/scooter-tuuner/
-          sftp_only: true
+          source: "index.html,style.css,app.js,ble.js,crypto.js,pairing.js,protocol.js,registers.js"
+          target: "/home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner/"
+          strip_components: 0
