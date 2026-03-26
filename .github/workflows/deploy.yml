@@ -19,7 +19,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
-          script: mkdir -p /home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner
+          script: mkdir -p ~/public_html/scooter-tuuner
 
       - name: Deploy via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
@@ -29,5 +29,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
           local_path: ./*
-          remote_path: /home/${{ secrets.FTP_USERNAME }}/public_html/scooter-tuuner/
+          remote_path: ~/public_html/scooter-tuuner/
           sftp_only: true
