@@ -97,8 +97,8 @@ function _parseHandshakeResponse(packet) {
 async function _step2_KeyExchange() {
   reportProgress(2, 'Drücke den Power-Button am Scooter!');
 
-  // Generate 16 random bytes as session key
-  sessionKey = crypto.getRandomValues(new Uint8Array(16));
+  // Fix: use globalThis.crypto explicitly to avoid conflict with getCrypto() import
+  sessionKey = globalThis.crypto.getRandomValues(new Uint8Array(16));
 
   const packet = buildPacket(ADDR.APP, ADDR.BLE, CMD.SEND_KEY, 0x00, Array.from(sessionKey));
 
@@ -110,21 +110,26 @@ async function _step2_KeyExchange() {
 
     // Register one-time response handler
     const responsePromise = waitForResponse(CMD.SEND_KEY);
-    responsePromise.then((response) => {
-      responseReceived = true;
-      const ackByte = response[7]; // First payload byte after header
-      if (ackByte === 0x01) {
-        reportProgress(2, 'Button gedrückt – Pairing erfolgreich');
+    responsePromise
+      .then((response) => {
+        responseReceived = true;
         clearInterval(retryInterval);
-        resolve();
-      } else {
+        const ackByte = response[7]; // First payload byte after header
+        if (ackByte === 0x01) {
+          reportProgress(2, 'Button gedrückt – Pairing erfolgreich');
+          resolve();
+        } else {
+          reject(new Error(`Key Exchange fehlgeschlagen – ACK: 0x${ackByte.toString(16)}`));
+        }
+      })
+      .catch((err) => {
+        // Fix: propagate errors from waitForResponse (e.g. timeout) to the outer Promise
         clearInterval(retryInterval);
-        reject(new Error(`Key Exchange fehlgeschlagen – ACK: 0x${ackByte.toString(16)}`));
-      }
-    });
+        reject(err);
+      });
 
     // Send key packet every second
-    const retryInterval = setInterval(async () => {
+    const retryInterval = setInterval(() => {
       if (Date.now() > deadline) {
         clearInterval(retryInterval);
         if (!responseReceived) {
